@@ -6,8 +6,93 @@
 	<title>Callum East - Home Page</title>
 </head>
 
-<body>
-	<h1>GIS</h1>
+<style>
+	.topbar{
+		width:100%;
+		height:100px;
+		background-color: peru;
+		display:flex;
+	}
+	.hideDir{
+		width:5%;
+		background-color: cyan;
+	}
+	.container{
+		width:100%;
+		display:flex;
+	}
+	#directory{
+		background-color: blue;
+		text-align: center;
+		width: 20%;
+		height: 100%;
+		display:none;
+		padding-bottom: 40px;
+	}
+
+	#content{
+		background-color: red;
+		text-align: center;
+		width: 60%;
+		height: 100%;
+		margin: 0% 0% 0% 20%
+	}
+</style>
+
+<body bgcolor="green">
+
+	<div class="topbar">
+		<div class="hideDir" onclick="hideDir()">
+			=
+		</div>
+	</div>
+
+	<div class="container">
+		<div id="directory">
+			<h2>GIS</h2>
+			<br>Finding Candian Sheild in Ontario</br>
+			<br>aksjdsa</br>
+			<br>aksjdsa</br>
+			<br>aksjdsa</br>
+			<br>aksjdsa</br>
+			<br>aksjdsa</br>
+		</div>
+		<div id="content"> 
+			<h1>Estimating Canadian sheild in Ontario using spectral signatures and Landsat9 data set</h1>
+			<p> 
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+				welcome to this is main body text
+			</p>
+		</div>
+	</div>
 
 </body>
+
+<script>
+	function hideDir() {
+		var dir = document.getElementById("directory");
+		var content = document.getElementById("content");
+		if (dir.style.display === "none") {
+			dir.style.display = "block";
+			content.style.margin = "0% 0% 0% 10%";
+		  } else {
+			dir.style.display = "none";
+			content.style.margin = "0% 0% 0% 20%";
+		}
+	}
+</script>
+
 </html>
