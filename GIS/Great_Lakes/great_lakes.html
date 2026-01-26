@@ -103,7 +103,7 @@
 			The command for the raster calculator with a threshold of 10000 can be writen as followed, where "'raster'" can be any word and "[raster]"
 			is the raster image read in from by the program from the command wbe.read_raster():
 			</p>
-			<code>raster = wbe.raster_calculator("'raster' < 10000", [raster])"</code>
+			<code>raster = wbe.raster_calculator('raster' < 10000", [raster])</code>
 
 			<blockquote> Note that we are using this raster calculator rather than QGIS built in one as Whitebox Workflows has a Python API that we will be 
 			using for this study. Whitebox Workflows keeps calculated rasters in memory, so when we want to use multiple tools it will be faster to do it this way.
@@ -135,7 +135,7 @@
 			<h3>Creating a script</h3>
 			<p> We can automate the previous commands for all rasters by using the <a href="">Whitebox Workflows for Python</a>. You can install this using <code>pip install whitebox-workflows</code>.
 			The following code will read in raster files from /directory_of_python_file/data/B5/ then on each raster it will apply the raster calculator, opening, and raster to vector polygons tools. 
-			Finally it will write out the vectors to /directory_of_python_file/data/output/. 
+			Finally it will write out the vectors to /directory_of_python_file/. 
 			</p>
 
 			<blockquote> Important: If you are on Windows, you will have to change all paths to use '\' instead of '/'.
@@ -187,7 +187,39 @@
 			<p> Once this is done running, ~1hr on my system, you can place the photos into QGIS to make the following photo:
 			</p>
 
-			<img href="images/Combined_Vectors.png">
+			<img src="images/Combined_Vectors.png">
+
+			<h3>Fixing the vectors</h3>
+			<p>
+				The shape files we receive from the code may have some errors associated with them. You can check what type of 
+				error is associated with your shapefiles by using the <button>Check Validity</button> under the vector geometry processing tool. 
+				This tool will create two shape files, one for valid, the other for invalid. You can open the attribute table of the invalid shapefile 
+				to see what type of error your shapefile has. In my case, I have the <span>ring self-intersection error</span>. This error can be fixed
+				by giving a buffer to every shapefile. For this we will need another script. The following script takes all active layers in Qgis
+				and adds default 10m buffer to each of them:
+			</p>
+			
+			<pre style = "text-align: left">
+			<code>
+				
+				from qgis.core import QgsProject
+				from qgis import processing
+
+				for layer in QgsProject.instance().mapLayers().values():
+					params = {
+						'INPUT': f'/directory_to_data/{layer.name()}.shp',
+						'DISTANCE':10,'SEGMENTS':5,'END_CAP_STYLE':0,'JOIN_STYLE':0,'MITER_LIMIT':2,'DISSOLVE':False,'SEPARATE_DISJOINT':False,
+						'OUTPUT': f'/directory_to_data/data/buffered/buffered_{layer.name()}.shp'
+					}
+					processing.run("native:buffer", params)
+			</code>
+			</pre>
+			
+			<blockquote> 
+				To run this script first place all the shapefiles into layers of Qgis. Then in plugins -> Python Console -> Show Editor (Paper with Pencil on the Top) -> Open Script, open the file from above. 
+				Make sure you change 'directory_to_data' to be the directory to your shapefiles. Once all is set, press the green arrow on top to run the script
+			</blockquote>
+
 			<br></br>
 			<a href="../../index.html"> back </a>
 		</div>
