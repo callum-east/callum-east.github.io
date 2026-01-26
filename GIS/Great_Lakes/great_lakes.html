@@ -103,7 +103,7 @@
 			The command for the raster calculator with a threshold of 10000 can be writen as followed, where "'raster'" can be any word and "[raster]"
 			is the raster image read in from by the program from the command wbe.read_raster():
 			</p>
-			<code>"raster = wbe.raster_calculator("'raster' < 10000", [raster])"</code>
+			<code>raster = wbe.raster_calculator("'raster' < 10000", [raster])"</code>
 
 			<blockquote> Note that we are using this raster calculator rather than QGIS built in one as Whitebox Workflows has a Python API that we will be 
 			using for this study. Whitebox Workflows keeps calculated rasters in memory, so when we want to use multiple tools it will be faster to do it this way.
@@ -133,8 +133,61 @@
 			<img src="images/Raster_to_Vector.png">
 			
 			<h3>Creating a script</h3>
-			<p> We can automate the previous commands for all</p>
+			<p> We can automate the previous commands for all rasters by using the <a href="">Whitebox Workflows for Python</a>. You can install this using <code>pip install whitebox-workflows</code>.
+			The following code will read in raster files from /directory_of_python_file/data/B5/ then on each raster it will apply the raster calculator, opening, and raster to vector polygons tools. 
+			Finally it will write out the vectors to /directory_of_python_file/data/output/. 
+			</p>
 
+			<blockquote> Important: If you are on Windows, you will have to change all paths to use '\' instead of '/'.
+				<br>If you are on Linux you will need create a virtual environment before you can install whitebox-workflows using pip. See <a href="">this</a> for how to setup a virtual environment.</br>
+			</blockquote>
+			<pre style = "text-align: left">
+			<code> 
+				import os
+				from whitebox_workflows import WbEnvironment
+				wbe = WbEnvironment()
+
+				try:
+					wbe.working_directory = 'data'
+					wbe.verbose = False
+
+					# Read in rasters
+					path = rf'{wbe.working_directory}/B5'
+					rasters = []
+					raster_names = []
+					for file_name in os.listdir(path):
+						print(file_name)
+						raster_names.append(file_name)
+						rasters.append(wbe.read_raster(rf'{path}/{file_name}'))
+
+					count = len(rasters)
+					print(rf'Count: {count}')
+
+					# For each raster
+					for i, raster in enumerate(rasters):
+
+						print(f'{i}/{count}')
+						# Extract Water
+						raster = wbe.raster_calculator("'raster' < 10000", [raster])
+
+						# Opening to simplify data
+						raster = wbe.opening(raster, 40, 40)
+
+						# Converting Raster to Vector
+						vector = wbe.raster_to_vector_polygons(raster)
+
+						# Write out raster
+						wbe.write_vector(vector, rf"{raster_names[i]}.shp")
+
+				except Exception as e:
+					print(e)
+			</code>
+			</pre>
+
+			<p> Once this is done running, ~1hr on my system, you can place the photos into QGIS to make the following photo:
+			</p>
+
+			<img href="images/Combined_Vectors.png">
 			<br></br>
 			<a href="../../index.html"> back </a>
 		</div>
