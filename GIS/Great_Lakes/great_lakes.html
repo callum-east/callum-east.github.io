@@ -230,7 +230,7 @@ for layer in QgsProject.instance().mapLayers().values():
 			<h3>Splitting Lake Huron and Lake Michigan</h3>
 			<p>
 				Lake Huron and Lake Michigan are usually split by the Mackinac Bridge. This bridge 
-				is too small to split automatically by when we ran wbe.raster_calculator, so we will
+				was too small to split automatically when we ran wbe.raster_calculator, so we will
 				need to split it manually. Unfortunatly this is quite a nucance to do. To start we
 				will need to start by using the <button>Advanced Digitizing Toolbar</button>. We 
 				can accessing this toolbar by going to View -> Toolbars -> and clicking it on. Once 
@@ -251,6 +251,32 @@ for layer in QgsProject.instance().mapLayers().values():
 				</br>
 			</blockquote>
 			<img src="images/Michigan_Huron_Split.png">
+
+			<h3>Dissolving the Lakes</h3>
+			<p>
+				Currently our lakes are divided up by where the satellites happened to take the its 
+				images, however we would like it to be divided by the lake perimeter. We can solve 
+				this issue by dissolving the polygons of a given lake together. Start by selecting 
+				the all the polygons for the lake you want to dissolve, like I have done below. Once selected you can 
+				run the <button>Buffer</button> tool and make sure you have <button>Selected Features Only</button>
+				and <button>Dissolve Result</button> selected and Run. 
+			</p>
+			
+			<img src=images/Selected_from_Combined_Vectors.png>
+			
+			<p>
+				Repeat this step for the other lakes, and any other lakes you want to add. After you 
+				should have something similar to the following image:
+			</p>
+			<img src="images/Individual_Great_Lakes.png">
+
+			<h3>The Great Lakes</h3>
+			<p>
+				Lastly Combine the Great Lakes together using <button>Union Multiple</button>.
+			</p>
+			<img src="images/Great_Lakes.png">
+			
+			<h3>Creating the attribute table<h3>
 			<br></br>
 			<a href="../../index.html"> back </a>
 		</div>
