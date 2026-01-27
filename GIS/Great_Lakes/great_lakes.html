@@ -142,52 +142,52 @@
 				<br>If you are on Linux you will need create a virtual environment before you can install whitebox-workflows using pip. See <a href="">this</a> for how to setup a virtual environment.</br>
 			</blockquote>
 			<pre style = "text-align: left">
-			<code> 
-				import os
-				from whitebox_workflows import WbEnvironment
-				wbe = WbEnvironment()
+			<code style = "text-align: left"> 
+import os
+from whitebox_workflows import WbEnvironment
+wbe = WbEnvironment()
 
-				try:
-					wbe.working_directory = 'data'
-					wbe.verbose = False
+try:
+	wbe.working_directory = 'data'
+	wbe.verbose = False
 
-					# Read in rasters
-					path = rf'{wbe.working_directory}/B5'
-					rasters = []
-					raster_names = []
-					for file_name in os.listdir(path):
-						print(file_name)
-						raster_names.append(file_name)
-						rasters.append(wbe.read_raster(rf'{path}/{file_name}'))
+	# Read in rasters
+	path = rf'{wbe.working_directory}/B5'
+	rasters = []
+	raster_names = []
+	for file_name in os.listdir(path):
+		print(file_name)
+		raster_names.append(file_name)
+		rasters.append(wbe.read_raster(rf'{path}/{file_name}'))
 
-					count = len(rasters)
-					print(rf'Count: {count}')
+	count = len(rasters)
+	print(rf'Count: {count}')
 
-					# For each raster
-					for i, raster in enumerate(rasters):
+	# For each raster
+	for i, raster in enumerate(rasters):
 
-						print(f'{i}/{count}')
-						# Extract Water
-						raster = wbe.raster_calculator("'raster' < 10000", [raster])
+		print(f'{i}/{count}')
+		# Extract Water
+		raster = wbe.raster_calculator("'raster' < 10000", [raster])
 
-						# Opening to simplify data
-						raster = wbe.opening(raster, 40, 40)
+		# Opening to simplify data
+		raster = wbe.opening(raster, 40, 40)
 
-						# Converting Raster to Vector
-						vector = wbe.raster_to_vector_polygons(raster)
+		# Converting Raster to Vector
+		vector = wbe.raster_to_vector_polygons(raster)
 
-						# Write out raster
-						wbe.write_vector(vector, rf"{raster_names[i]}.shp")
+		# Write out raster
+		wbe.write_vector(vector, rf"{raster_names[i]}.shp")
 
-				except Exception as e:
-					print(e)
+except Exception as e:
+	print(e)
 			</code>
 			</pre>
 
-			<p> Once this is done running, ~1hr on my system, you can place the photos into QGIS to make the following photo:
+			<p> Once this is done running, ~10 minutes on my system, you can place the photos into QGIS to make the following photo:
 			</p>
 
-			<img src="images/Combined_Vectors.png">
+			<img src="images/All_Vectors.png">
 
 			<h3>Fixing the vectors</h3>
 			<p>
@@ -200,18 +200,18 @@
 			</p>
 			
 			<pre style = "text-align: left">
-			<code>
+			<code style = "text-align: left">
 				
-				from qgis.core import QgsProject
-				from qgis import processing
+from qgis.core import QgsProject
+from qgis import processing
 
-				for layer in QgsProject.instance().mapLayers().values():
-					params = {
-						'INPUT': f'/directory_to_data/{layer.name()}.shp',
-						'DISTANCE':10,'SEGMENTS':5,'END_CAP_STYLE':0,'JOIN_STYLE':0,'MITER_LIMIT':2,'DISSOLVE':False,'SEPARATE_DISJOINT':False,
-						'OUTPUT': f'/directory_to_data/data/buffered/buffered_{layer.name()}.shp'
-					}
-					processing.run("native:buffer", params)
+for layer in QgsProject.instance().mapLayers().values():
+	params = {
+		'INPUT': f'/directory_to_data/{layer.name()}.shp',
+		'DISTANCE':10,'SEGMENTS':5,'END_CAP_STYLE':0,'JOIN_STYLE':0,'MITER_LIMIT':2,'DISSOLVE':False,'SEPARATE_DISJOINT':False,
+		'OUTPUT': f'/directory_to_data/data/buffered/buffered_{layer.name()}.shp'
+	}
+	processing.run("native:buffer", params)
 			</code>
 			</pre>
 			
@@ -219,7 +219,38 @@
 				To run this script first place all the shapefiles into layers of Qgis. Then in plugins -> Python Console -> Show Editor (Paper with Pencil on the Top) -> Open Script, open the file from above. 
 				Make sure you change 'directory_to_data' to be the directory to your shapefiles. Once all is set, press the green arrow on top to run the script
 			</blockquote>
+			<h3>Unionizing the Vectors</h3>
+			<p>
+				We are now ready to unionize the vectors. Move all Shapefiles from the buffered folder
+				into Layers, then in the <button>Union (Multiple)</button> tool select all 
+				layers, set an output layer, and run. The output should give an image similar to this:
+			</p>
+			<img src="images/Combined_Vectors.png">
 
+			<h3>Splitting Lake Huron and Lake Michigan</h3>
+			<p>
+				Lake Huron and Lake Michigan are usually split by the Mackinac Bridge. This bridge 
+				is too small to split automatically by when we ran wbe.raster_calculator, so we will
+				need to split it manually. Unfortunatly this is quite a nucance to do. To start we
+				will need to start by using the <button>Advanced Digitizing Toolbar</button>. We 
+				can accessing this toolbar by going to View -> Toolbars -> and clicking it on. Once 
+				added, you can select the unioned layer, and click <button>Toggle Editing</button>
+				(the pencil) under the Vector Toolbar. Then click the <button>Split Features</button>
+				(The scissors splitting the polygons) in the Advanced Digitizing Toolbar and split 
+				the Mackinac Bridge Similar to how I've done it below. (Left click to add points, 
+				Right click to confirm split)
+			</p>
+			<blockquote> 
+				Note: You may have some data in Lake Michigan  that for some reason is connected
+				to Lake Huron polygon after the split, and vice versa. To fix this you can merge
+				those specific parts with the Lake Michigan polygon using <button>Merge Selected Features</button> (2 left of Split Features). 
+				Once you merge you can then re-split the Polygons to fix the issue.
+				<br>
+					You may still have left over residue after the split and the merge, you can remove
+					this manually by using <button>Delete Part</button>(5 left of Delete Part)
+				</br>
+			</blockquote>
+			<img src="images/Michigan_Huron_Split.png">
 			<br></br>
 			<a href="../../index.html"> back </a>
 		</div>
